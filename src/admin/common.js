@@ -18,6 +18,9 @@ const ERRORS = {
   bad_website: 'Неверная ссылка на сайт',
   forbidden: 'Нет доступа',
   not_found: 'Не найдено',
+  subscription_expired: 'Подписка закончилась — продлите её во вкладке «Магазин», чтобы создавать приглашения.',
+  limit_reached: 'Лимит приглашений на этот месяц исчерпан — перейдите на тариф побольше во вкладке «Магазин».',
+  bad_order_link: 'Укажи номер WhatsApp (например +7 701 123 45 67) или ссылку https://…',
 };
 
 export const errText = (e) => ERRORS[e?.message] || 'Что-то пошло не так. Проверь интернет и попробуй ещё раз.';
@@ -52,3 +55,9 @@ export function generatePassword(len = 10) {
 
 export const fmtDateTime = (ms) =>
   new Date(ms).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+export const fmtDate = (ms) => (ms ? new Date(ms).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
+export const fmtMoney = (n) => (n == null ? '—' : `${Number(n).toLocaleString('ru-RU')} ₸`);
+export const limitText = (limit) => (limit == null ? 'без ограничений' : `${limit} приглашений в месяц`);
+
+export const PLAN_BADGE = { trial: '', start: 'info', business: 'ok', unlimited: 'ok' };

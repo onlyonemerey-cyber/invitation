@@ -169,6 +169,7 @@ export default function StatsTab({ me, shops }) {
             <Tile label="Ответили «Да»" value={t.answered} sub={`${pct(t.answered, t.opened)} от открывших`} />
             <Tile label="Доставлено" value={t.delivered} sub={`${pct(t.delivered, t.answered)} ответов`} />
             <Tile label="Покупатели в боте" value={t.connected} sub={`${pct(t.connected, t.created)} от созданных`} />
+            <Tile label="Перешли к заказу 💐" value={t.ordered} sub={`${pct(t.ordered, t.answered)} ответивших`} />
             <Tile label="Попыток «Нет»" value={t.avg_escapes ?? '—'} sub="в среднем 😄" />
           </div>
 
@@ -196,7 +197,7 @@ export default function StatsTab({ me, shops }) {
                 <div className="st-table-wrap">
                   <table className="st-table">
                     <thead>
-                      <tr><th>Магазин</th><th>Создано</th><th>Ответили</th><th>Доставлено</th><th>Конверсия</th></tr>
+                      <tr><th>Магазин</th><th>Создано</th><th>Ответили</th><th>Доставлено</th><th>К заказу</th><th>Конверсия</th></tr>
                     </thead>
                     <tbody>
                       {data.shops.map((s) => (
@@ -205,6 +206,7 @@ export default function StatsTab({ me, shops }) {
                           <td>{s.created}</td>
                           <td>{s.answered}</td>
                           <td>{s.delivered}</td>
+                          <td>{s.ordered}</td>
                           <td>{pct(s.answered, s.created)}</td>
                         </tr>
                       ))}

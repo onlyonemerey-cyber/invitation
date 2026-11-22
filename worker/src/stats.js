@@ -41,6 +41,7 @@ export async function getStats(env, auth, url) {
        COALESCE(SUM(buyer_chat_id IS NOT NULL), 0) AS connected,
        COALESCE(SUM(answer IS NOT NULL), 0) AS answered,
        COALESCE(SUM(delivered_at IS NOT NULL), 0) AS delivered,
+       COALESCE(SUM(order_clicks > 0), 0) AS ordered,
        AVG(json_extract(answer, '$.escapes')) AS avg_escapes
      FROM invites ${where}`
   )
@@ -82,7 +83,8 @@ export async function getStats(env, auth, url) {
       `SELECT s.id, s.name, s.active,
          COUNT(i.id) AS created,
          COALESCE(SUM(i.answer IS NOT NULL), 0) AS answered,
-         COALESCE(SUM(i.delivered_at IS NOT NULL), 0) AS delivered
+         COALESCE(SUM(i.delivered_at IS NOT NULL), 0) AS delivered,
+         COALESCE(SUM(i.order_clicks > 0), 0) AS ordered
        FROM shops s LEFT JOIN invites i ON i.shop_id = s.id ${shopConds}
        GROUP BY s.id ORDER BY created DESC`
     )

@@ -1,5 +1,6 @@
-import { clean, fail, json, newId, normalizeUsername, now, readJson, esc } from './util.js';
-import { deliverAnswer, sendMessage } from './telegram.js';
+import { clean, fail, json, newId, normalizeUsername, now, readJson, esc, formatDateRu } from './util.js';
+import { answerSummary, deliverAnswer, notifyShop, sendMessage } from './telegram.js';
+import { billingState, usedThisMonth } from './plans.js';
 
 // ---------- публичное (страница девушки) ----------
 
@@ -34,7 +35,7 @@ export async function getPublicInvite(env, id, ctx) {
   });
 }
 
-export async function postAnswer(req, env, id) {
+export async function postAnswer(req, env, id, ctx) {
   const inv = await env.DB.prepare('SELECT * FROM invites WHERE id = ?').bind(id).first();
   if (!inv) fail(404, 'not_found');
   if (inv.answer_count >= 10) fail(429, 'too_many_changes');
@@ -58,9 +59,62 @@ export async function postAnswer(req, env, id) {
     .bind(inv.answer, now(), id)
     .run();
 
+  // магазину — о новом ответе (только о первом, без спама при изменениях)
+  if (!isUpdate && inv.shop_id) {
+    const buyer = inv.buyer_username ? `@${esc(inv.buyer_username)}` : 'без username';
+    ctx.waitUntil(
+      notifyShop(
+        env,
+        inv.shop_id,
+        `💌 <b>${esc(inv.to_name)} ответила «Да»!</b>\n${answerSummary(answer)}\nПокупатель: ${buyer}` +
+          (inv.buyer_chat_id ? '' : '\n⚠️ Покупатель ещё не нажал Start в боте — напомните ему.')
+      )
+    );
+  }
+
   // если покупатель ещё не нажал Start — ответ сохранён и придёт после /start
   const delivered = await deliverAnswer(env, inv, isUpdate);
   return json({ ok: true, delivered });
+}
+
+/** GET /r/:id — кнопка «Заказать букет»: считаем переход и ведём в WhatsApp / на сайт магазина. */
+export async function orderRedirect(env, id, ctx) {
+  const inv = await env.DB.prepare(
+    `SELECT i.*, s.order_link FROM invites i LEFT JOIN shops s ON s.id = i.shop_id WHERE i.id = ?`
+  )
+    .bind(id)
+    .first();
+  if (!inv?.order_link) return Response.redirect(env.SITE_URL, 302);
+
+  await env.DB.prepare(
+    'UPDATE invites SET order_clicks = order_clicks + 1, order_clicked_at = COALESCE(order_clicked_at, ?) WHERE id = ?'
+  )
+    .bind(now(), id)
+    .run();
+
+  const answer = inv.answer ? JSON.parse(inv.answer) : null;
+  if (!inv.order_clicked_at) {
+    const buyer = inv.buyer_username ? `@${esc(inv.buyer_username)}` : 'без username';
+    ctx.waitUntil(
+      notifyShop(
+        env,
+        inv.shop_id,
+        `🛒 <b>Покупатель перешёл к заказу букета</b>\nДля: ${esc(inv.to_name)}` +
+          (answer ? `\n${answerSummary(answer)}` : '') +
+          `\nПокупатель: ${buyer}`
+      )
+    );
+  }
+
+  let target = inv.order_link;
+  if (target.startsWith('wa:')) {
+    const text =
+      'Здравствуйте! Хочу заказать букет к свиданию 💐' +
+      (answer ? `\nКогда: ${formatDateRu(answer.date)}, ${answer.time}\nКуда идём: ${answer.place}` : '') +
+      `\n(приглашение ${inv.id})`;
+    target = `https://wa.me/${target.slice(3)}?text=${encodeURIComponent(text)}`;
+  }
+  return Response.redirect(target, 302);
 }
 
 // ---------- админка ----------
@@ -80,6 +134,7 @@ function adminView(inv, env) {
     answer: inv.answer ? JSON.parse(inv.answer) : null,
     answeredAt: inv.answered_at,
     deliveredAt: inv.delivered_at,
+    orderClicks: inv.order_clicks ?? 0,
     buyerLink: `https://t.me/${env.BOT_USERNAME}?start=${inv.id}`,
   };
 }
@@ -111,9 +166,13 @@ export async function createInvite(req, env, auth) {
   if (!toName) fail(400, 'to_name_required');
   if (buyer && !/^[a-z0-9_]{4,32}$/.test(buyer)) fail(400, 'bad_username');
 
-  // магазин создаёт только для себя; супер-админ может указать магазин
+  // магазин создаёт только для себя и в рамках тарифа; супер-админ — без ограничений
   let shopId = auth.shopId;
-  if (auth.role === 'super' && body.shopId) {
+  if (auth.role === 'shop') {
+    const state = billingState(auth.shop, await usedThisMonth(env, shopId));
+    if (state.expired) fail(402, 'subscription_expired');
+    if (state.limitReached) fail(402, 'limit_reached');
+  } else if (body.shopId) {
     const s = await env.DB.prepare('SELECT id FROM shops WHERE id = ?').bind(body.shopId).first();
     if (!s) fail(400, 'shop_not_found');
     shopId = s.id;

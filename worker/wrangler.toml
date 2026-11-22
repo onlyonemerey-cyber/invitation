@@ -6,8 +6,14 @@ compatibility_date = "2024-11-01"
 # Куда ведут ссылки для девушки
 SITE_URL = "https://onlyonemerey-cyber.github.io/invitation/"
 BOT_USERNAME = "WithLoveGiftBot"
+# Адрес этого API (для кнопки «Заказать букет» в Telegram)
+API_URL = "https://invitation-api.withlove-gift.workers.dev"
 # С каких сайтов можно обращаться к API (через запятую)
 ALLOWED_ORIGINS = "https://onlyonemerey-cyber.github.io,http://localhost:5173"
+
+# Ежедневно в 09:00 по Казахстану — напоминания об оплате подписки
+[triggers]
+crons = ["0 4 * * *"]
 
 [[d1_databases]]
 binding = "DB"

@@ -103,3 +103,25 @@ export function checkPassword(v) {
   if (s.length < 8 || s.length > 128) fail(400, 'weak_password');
   return s;
 }
+
+/**
+ * Ссылка для заказа букета: номер телефона → "wa:77011234567" (WhatsApp), иначе обычная ссылка.
+ */
+export function cleanOrderLink(v) {
+  const s = clean(v, 200);
+  if (!s) return null;
+  if (/^\+?[\d\s()-]{10,20}$/.test(s)) {
+    let digits = s.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('8')) digits = '7' + digits.slice(1); // 8 701… → 7 701…
+    if (digits.length < 10 || digits.length > 15) fail(400, 'bad_order_link');
+    return 'wa:' + digits;
+  }
+  try {
+    return cleanUrl(s);
+  } catch {
+    fail(400, 'bad_order_link');
+  }
+}
+
+/** Для показа в форме: "wa:7701…" → "+7701…" */
+export const orderLinkView = (v) => (v && v.startsWith('wa:') ? '+' + v.slice(3) : v || null);

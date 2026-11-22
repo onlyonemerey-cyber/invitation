@@ -81,6 +81,9 @@ export const api = {
   me: () => request('/api/me', { auth: true }),
   updateMyShop: (data) => request('/api/me/shop', { method: 'PUT', body: data, auth: true }),
   changePassword: (current, next) => request('/api/me/password', { method: 'PUT', body: { current, next }, auth: true }),
+  billing: () => request('/api/me/billing', { auth: true }),
+  telegram: () => request('/api/me/telegram', { auth: true }),
+  removeChat: (chatId) => request(`/api/me/telegram/${chatId}`, { method: 'DELETE', auth: true }),
 
   invites: (shop) => request(`/api/admin/invites${q({ shop })}`, { auth: true }),
   createInvite: (data) => request('/api/admin/invites', { method: 'POST', body: data, auth: true }),
@@ -91,4 +94,8 @@ export const api = {
   shops: () => request('/api/super/shops', { auth: true }),
   createShop: (data) => request('/api/super/shops', { method: 'POST', body: data, auth: true }),
   updateShop: (id, data) => request(`/api/super/shops/${encodeURIComponent(id)}`, { method: 'PUT', body: data, auth: true }),
+  extendShop: (id, data) => request(`/api/super/shops/${encodeURIComponent(id)}/extend`, { method: 'POST', body: data, auth: true }),
+  payments: () => request('/api/super/payments', { auth: true }),
+  settings: () => request('/api/super/settings', { auth: true }),
+  saveSettings: (data) => request('/api/super/settings', { method: 'PUT', body: data, auth: true }),
 };

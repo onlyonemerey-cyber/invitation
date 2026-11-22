@@ -89,7 +89,17 @@ export default function Admin() {
         ))}
       </nav>
 
-      {tab === 'invites' && <InvitesTab me={me} shops={shops} shopsById={shopsById} />}
+      {tab === 'invites' && (
+        <InvitesTab
+          me={me}
+          shops={shops}
+          shopsById={shopsById}
+          onGoBilling={() => {
+            setTab('settings');
+            setTimeout(() => document.getElementById('billing')?.scrollIntoView({ behavior: 'smooth' }), 100);
+          }}
+        />
+      )}
       {tab === 'stats' && <StatsTab me={me} shops={shops} />}
       {tab === 'settings' && me.role === 'shop' && <SettingsTab me={me} onUpdated={(shop) => setMe({ ...me, shop })} />}
       {tab === 'shops' && me.role === 'super' && <ShopsTab shops={shops} onChange={loadShops} />}

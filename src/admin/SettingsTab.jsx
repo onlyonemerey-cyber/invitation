@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { api } from '../lib/api.js';
 import BrandingForm from './BrandingForm.jsx';
+import BillingCard from './BillingCard.jsx';
+import TelegramCard from './TelegramCard.jsx';
 import { errText } from './common.js';
 
-const pick = (s) => ({ name: s.name, color: s.color, logo: s.logo, website: s.website ? s.website.replace(/^https:\/\//, '') : '' });
+const pick = (s) => ({
+  name: s.name,
+  color: s.color,
+  logo: s.logo,
+  website: s.website ? s.website.replace(/^https:\/\//, '') : '',
+  orderLink: s.orderLink || '',
+});
 
 export default function SettingsTab({ me, onUpdated }) {
   const [form, setForm] = useState(() => pick(me.shop));
@@ -46,6 +54,9 @@ export default function SettingsTab({ me, onUpdated }) {
 
   return (
     <>
+      <BillingCard />
+      <TelegramCard />
+
       <form className="adm-card" onSubmit={save}>
         <h2>Брендинг</h2>
         <BrandingForm value={form} onChange={setForm} />

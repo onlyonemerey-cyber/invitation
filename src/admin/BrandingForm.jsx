@@ -64,9 +64,15 @@ export default function BrandingForm({ value, onChange }) {
         </div>
 
         <label className="adm-field">
-          <span>Сайт, Instagram или WhatsApp</span>
+          <span>Куда вести «Заказать букет»</span>
+          <input className="input" value={value.orderLink || ''} maxLength={200} onChange={(e) => set('orderLink', e.target.value)} placeholder="+7 701 123 45 67 или ссылка на сайт" autoCapitalize="none" inputMode="url" />
+          <small>Номер — откроется WhatsApp с готовым текстом заказа (дата, время, место). Кнопка придёт покупателю вместе с ответом девушки.</small>
+        </label>
+
+        <label className="adm-field">
+          <span>Сайт или Instagram</span>
           <input className="input" value={value.website || ''} maxLength={200} onChange={(e) => set('website', e.target.value)} placeholder="instagram.com/roza_flowers" autoCapitalize="none" />
-          <small>Ссылка придёт покупателю вместе с ответом: «💐 Цветы к свиданию — …»</small>
+          <small>Ссылка под приглашением у девушки (логотип и название магазина).</small>
         </label>
       </div>
 

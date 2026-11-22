@@ -415,3 +415,33 @@ select.input {
 @media (max-width: 420px) { .adm-tab-emoji { display: none; } .adm-tab { font-size: 13px; } }
 @media (max-width: 420px) { .adm-tab { font-size: 12px; padding: 10px 2px; letter-spacing: -0.2px; } .adm-tabs { gap: 2px; padding: 4px; } }
 .adm-field small.adm-warn { color: #c62f5f; font-weight: 700; }
+
+/* ===================== Этап 3 ===================== */
+textarea.input { resize: vertical; min-height: 80px; line-height: 1.45; font-family: inherit; }
+.bl-banner {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+  background: #fff6e6; border: 1px solid #ffe0a8; color: #8a5208; font-weight: 700; font-size: 14px;
+  padding: 12px 16px;
+}
+.bl-usage { background: #fff7fa; border: 1px solid var(--pink-soft); border-radius: 16px; padding: 14px; margin: 6px 0 14px; }
+.bl-usage-top { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin-bottom: 8px; }
+.bl-bar { height: 10px; background: var(--pink-soft); border-radius: 99px; overflow: hidden; }
+.bl-bar span { display: block; height: 100%; background: var(--pink-dark); border-radius: 99px; transition: width 0.4s; }
+.bl-bar.hot span { background: #e0802a; }
+.bl-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.bl-plan {
+  background: #fff; border: 2px solid var(--pink-soft); border-radius: 16px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+}
+.bl-plan.on { border-color: var(--pink-dark); }
+.bl-price { font-size: 20px; font-weight: 700; color: var(--text); }
+.bl-price small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.bl-pay { background: #fff7fa; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.bl-pay p { font-size: 14px; line-height: 1.5; white-space: pre-wrap; color: var(--text); }
+.tg-chats { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.tg-chats li {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center;
+  background: #fff7fa; border-radius: 12px; padding: 8px 12px; font-size: 14px;
+}
+.st-tiles { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 640px) { .st-tiles { grid-template-columns: repeat(4, 1fr); } }

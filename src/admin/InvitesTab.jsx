@@ -7,6 +7,23 @@ import PrintCard from './PrintCard.jsx';
 
 // ---------- создание ----------
 
+function BillingBanner({ billing, onGo }) {
+  if (!billing) return null;
+  let text = null;
+  if (billing.expired) text = '⚠️ Подписка закончилась — новые приглашения создавать нельзя.';
+  else if (billing.limitReached) text = `⚠️ Лимит тарифа «${billing.planName}» на этот месяц исчерпан (${billing.used}/${billing.limit}).`;
+  else if (billing.daysLeft <= 3) text = `⏰ Подписка заканчивается через ${billing.daysLeft} дн.`;
+  else if (billing.limit != null && billing.used >= billing.limit * 0.8)
+    text = `Использовано ${billing.used} из ${billing.limit} приглашений в этом месяце.`;
+  if (!text) return null;
+  return (
+    <div className="adm-card bl-banner">
+      <span>{text}</span>
+      <button type="button" className="adm-btn accent" onClick={onGo}>Тариф и оплата</button>
+    </div>
+  );
+}
+
 function CreateForm({ me, shops, onCreated }) {
   const empty = { buyerUsername: '', toName: '', fromName: '', question: '', shopId: '' };
   const [form, setForm] = useState(empty);
@@ -163,6 +180,7 @@ function InviteRow({ inv, showShop, open, onToggle, onDelete, onPrint, copied, c
             {inv.buyerConnected ? '✓ Покупатель в боте' : 'Покупатель не в боте'}
           </span>
           <span className={'adm-badge ' + st.cls}>{st.text}</span>
+          {inv.orderClicks > 0 && <span className="adm-badge ok">🛒 Перешёл к заказу</span>}
         </div>
       </button>
 
@@ -194,8 +212,9 @@ const matches = (inv, f) =>
   (f === 'answered' && inv.answer) ||
   (f === 'undelivered' && inv.answer && !inv.deliveredAt);
 
-export default function InvitesTab({ me, shops, shopsById }) {
+export default function InvitesTab({ me, shops, shopsById, onGoBilling }) {
   const [invites, setInvites] = useState([]);
+  const [billing, setBilling] = useState(null);
   const [shopFilter, setShopFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -218,13 +237,19 @@ export default function InvitesTab({ me, shops, shopsById }) {
     }
   }, [shopFilter]);
 
+  const loadBilling = useCallback(() => {
+    if (me.role === 'shop') api.billing().then(setBilling).catch(() => {});
+  }, [me.role]);
+
   useEffect(() => {
     load();
+    loadBilling();
     const id = setInterval(load, 20000); // статусы обновляются сами
     return () => clearInterval(id);
-  }, [load]);
+  }, [load, loadBilling]);
 
   const onCreated = (inv) => {
+    loadBilling();
     setCreated(inv);
     setInvites((list) => [inv, ...list]);
     setTimeout(() => document.getElementById('created')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
@@ -253,6 +278,7 @@ export default function InvitesTab({ me, shops, shopsById }) {
 
   return (
     <>
+      <BillingBanner billing={billing} onGo={onGoBilling} />
       <CreateForm me={me} shops={shops} onCreated={onCreated} />
 
       {created && (

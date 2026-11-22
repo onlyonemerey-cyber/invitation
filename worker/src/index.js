@@ -24,15 +24,32 @@
  *   PUT  /api/super/shops/:id         — любые поля + active + password
  *   POST /api/super/setup-webhook
  *
+ * Магазин:
+ *   GET    /api/me/billing           — тариф, лимит, реквизиты для оплаты
+ *   GET    /api/me/telegram          — ссылка для уведомлений + подключённые чаты
+ *   DELETE /api/me/telegram/:chatId
+ *
+ * Супер-админ (оплаты вручную):
+ *   POST /api/super/shops/:id/extend  — {plan, months, amount, note}
+ *   GET  /api/super/payments
+ *   GET|PUT /api/super/settings       — {paymentInstructions, contact}
+ *
+ * Покупатель:
+ *   GET /r/:id                        — «Заказать букет» → WhatsApp/сайт магазина (считает переход)
+ *
  * Telegram:
  *   POST /tg/webhook
  */
 import { HttpError, json, readJson } from './util.js';
 import { authenticate, login, logout, requireSuper } from './auth.js';
 import { handleWebhook, setupWebhook } from './telegram.js';
-import { createInvite, deleteInvite, getPublicInvite, listInvites, postAnswer } from './invites.js';
-import { changeOwnPassword, createShop, listShops, shopView, updateOwnShop, updateShop } from './shops.js';
+import { createInvite, deleteInvite, getPublicInvite, listInvites, orderRedirect, postAnswer } from './invites.js';
+import {
+  changeOwnPassword, createShop, extendShop, getOwnBilling, getOwnTelegram, getSuperSettings, listPayments,
+  listShops, removeOwnChat, shopView, updateOwnShop, updateSettings, updateShop,
+} from './shops.js';
 import { getStats } from './stats.js';
+import { dailyReminders } from './cron.js';
 
 function corsHeaders(req, env) {
   const origin = req.headers.get('Origin');
@@ -63,7 +80,8 @@ async function route(req, env, ctx) {
 
   // публичное
   if ((m = p.match(new RegExp(`^/api/invites/${ID}$`))) && method === 'GET') return getPublicInvite(env, m[1], ctx);
-  if ((m = p.match(new RegExp(`^/api/invites/${ID}/answer$`))) && method === 'POST') return postAnswer(req, env, m[1]);
+  if ((m = p.match(new RegExp(`^/api/invites/${ID}/answer$`))) && method === 'POST') return postAnswer(req, env, m[1], ctx);
+  if ((m = p.match(new RegExp(`^/r/${ID}$`))) && method === 'GET') return orderRedirect(env, m[1], ctx);
 
   // вход
   if (p === '/api/auth/login' && method === 'POST') {
@@ -90,10 +108,11 @@ async function route(req, env, ctx) {
     if (auth.role !== 'shop') return json({ error: 'forbidden' }, 403);
     return updateOwnShop(req, env, auth);
   }
-  if (p === '/api/me/password' && method === 'PUT') {
-    if (auth.role !== 'shop') return json({ error: 'forbidden' }, 403);
-    return changeOwnPassword(req, env, auth);
-  }
+  if (p.startsWith('/api/me/') && auth.role !== 'shop') return json({ error: 'forbidden' }, 403);
+  if (p === '/api/me/password' && method === 'PUT') return changeOwnPassword(req, env, auth);
+  if (p === '/api/me/billing' && method === 'GET') return getOwnBilling(env, auth);
+  if (p === '/api/me/telegram' && method === 'GET') return getOwnTelegram(env, auth);
+  if ((m = p.match(/^\/api\/me\/telegram\/(-?\d{1,20})$/)) && method === 'DELETE') return removeOwnChat(env, auth, m[1]);
 
   if (p === '/api/admin/invites' && method === 'GET') return listInvites(env, auth, url);
   if (p === '/api/admin/invites' && method === 'POST') return createInvite(req, env, auth);
@@ -105,6 +124,10 @@ async function route(req, env, ctx) {
     if (p === '/api/super/shops' && method === 'GET') return listShops(env);
     if (p === '/api/super/shops' && method === 'POST') return createShop(req, env);
     if ((m = p.match(new RegExp(`^/api/super/shops/${ID}$`))) && method === 'PUT') return updateShop(req, env, m[1]);
+    if ((m = p.match(new RegExp(`^/api/super/shops/${ID}/extend$`))) && method === 'POST') return extendShop(req, env, m[1]);
+    if (p === '/api/super/payments' && method === 'GET') return listPayments(env);
+    if (p === '/api/super/settings' && method === 'GET') return getSuperSettings(env);
+    if (p === '/api/super/settings' && method === 'PUT') return updateSettings(req, env);
     if (p === '/api/super/setup-webhook' && method === 'POST') {
       const r = await setupWebhook(req, env);
       return json(r, r.telegram.ok ? 200 : 502);
@@ -131,5 +154,10 @@ export default {
     const out = new Response(res.body, res);
     for (const [k, v] of Object.entries(cors)) out.headers.set(k, v);
     return out;
+  },
+
+  // ежедневно (см. [triggers] в wrangler.toml): напоминания об оплате
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dailyReminders(env));
   },
 };
