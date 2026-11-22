@@ -7,6 +7,22 @@ import FinalScreen from './components/FinalScreen.jsx';
 import { PLACES } from './data.js';
 import { addDays, formatRu, toISO } from './lib/dates.js';
 import { apiConfigured, getInvite, sendAnswer } from './lib/api.js';
+import { applyTheme } from './lib/theme.js';
+
+function ShopFooter({ shop }) {
+  if (!shop) return null;
+  const inner = (
+    <>
+      {shop.logo && <img src={shop.logo} alt="" />}
+      <span>💐 {shop.name}</span>
+    </>
+  );
+  return shop.website ? (
+    <a className="shop-footer" href={shop.website} target="_blank" rel="noreferrer">{inner}</a>
+  ) : (
+    <div className="shop-footer">{inner}</div>
+  );
+}
 
 const STEPS = ['ask', 'place', 'date', 'final'];
 
@@ -37,6 +53,7 @@ export default function App({ inviteId }) {
       .then((inv) => {
         if (cancelled) return;
         setInvite(inv);
+        applyTheme(inv.shop?.color);
         // если она уже отвечала — сразу показываем её выбор
         if (inv.answer) {
           const a = inv.answer;
@@ -171,6 +188,7 @@ export default function App({ inviteId }) {
           )}
         </div>
       </main>
+      <ShopFooter shop={invite?.shop} />
     </>
   );
 }

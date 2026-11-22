@@ -7,7 +7,9 @@
   --pink-soft: #ffe3ee;
   --text: #7a3655;
   --muted: #b06d8b;
-  --shadow: 0 20px 60px rgba(231, 90, 145, 0.25);
+  --bg3: #ffc2da;
+  --glow: 231, 90, 145;
+  --shadow: 0 20px 60px rgba(var(--glow), 0.25);
   --radius: clamp(22px, 6vw, 32px);
   --gap: clamp(8px, 2.5vw, 14px);
   color-scheme: light;
@@ -21,6 +23,7 @@
 }
 
 html {
+  background-color: var(--bg1);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -31,7 +34,7 @@ body {
   background-color: var(--bg1);
   background-image:
     radial-gradient(circle at 20% 20%, #fff 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, #ffc2da 0%, transparent 45%),
+    radial-gradient(circle at 80% 80%, var(--bg3) 0%, transparent 45%),
     linear-gradient(135deg, var(--bg1), var(--bg2));
   background-attachment: fixed;
   min-height: 100vh;
@@ -196,13 +199,13 @@ h2 {
 }
 
 .btn-yes {
-  background: linear-gradient(135deg, #ff9cc2, var(--pink-dark));
+  background: linear-gradient(135deg, var(--pink), var(--pink-dark));
   color: #fff;
-  box-shadow: 0 10px 25px rgba(231, 90, 145, 0.4);
+  box-shadow: 0 10px 25px rgba(var(--glow), 0.4);
 }
 @media (hover: hover) {
   .btn-yes:not([disabled]):hover {
-    box-shadow: 0 14px 30px rgba(231, 90, 145, 0.5);
+    box-shadow: 0 14px 30px rgba(var(--glow), 0.5);
     filter: brightness(1.05);
   }
 }
@@ -225,7 +228,7 @@ h2 {
   position: fixed;
   z-index: 1000;
   transition: left 0.35s cubic-bezier(0.3, 1.5, 0.5, 1), top 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
-  box-shadow: 0 8px 20px rgba(231, 90, 145, 0.18);
+  box-shadow: 0 8px 20px rgba(var(--glow), 0.18);
 }
 
 .link {
@@ -281,9 +284,9 @@ h2 {
   transform: scale(0.97);
 }
 .opt.selected {
-  background: linear-gradient(135deg, #ffe0ec, #ffc8dd);
+  background: linear-gradient(135deg, var(--pink-soft), var(--bg3));
   border-color: var(--pink-dark);
-  box-shadow: 0 8px 20px rgba(231, 90, 145, 0.25);
+  box-shadow: 0 8px 20px rgba(var(--glow), 0.25);
 }
 
 /* ---------- Поля ---------- */
@@ -469,3 +472,35 @@ h2 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- подпись магазина под карточкой ---------- */
+.shop-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px auto 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  max-width: calc(100% - 16px);
+}
+.shop-footer img {
+  height: 24px;
+  width: auto;
+  max-width: 48px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.shop-footer span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+a.shop-footer:hover { color: var(--pink-dark); }
