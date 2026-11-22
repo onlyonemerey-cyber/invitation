@@ -414,3 +414,4 @@ select.input {
 .pc-to { font-size: 32px; }
 @media (max-width: 420px) { .adm-tab-emoji { display: none; } .adm-tab { font-size: 13px; } }
 @media (max-width: 420px) { .adm-tab { font-size: 12px; padding: 10px 2px; letter-spacing: -0.2px; } .adm-tabs { gap: 2px; padding: 4px; } }
+.adm-field small.adm-warn { color: #c62f5f; font-weight: 700; }

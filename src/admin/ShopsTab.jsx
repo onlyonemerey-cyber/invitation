@@ -47,6 +47,9 @@ function CreateShop({ onCreated }) {
             <input className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button type="button" className="adm-btn" onClick={() => setPassword(generatePassword())} title="Сгенерировать">🎲</button>
           </div>
+          <small className={password.length < 8 ? 'adm-warn' : ''}>
+            {password.length < 8 ? `Минимум 8 символов — сейчас ${password.length}` : 'Минимум 8 символов ✓'}
+          </small>
         </label>
       </div>
       <BrandingForm value={brand} onChange={setBrand} />
@@ -92,6 +95,7 @@ function EditShop({ shop, onSaved, onCancel }) {
           <input className="input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="оставь пустым, чтобы не менять" />
           <button type="button" className="adm-btn" onClick={() => setPassword(generatePassword())} title="Сгенерировать">🎲</button>
         </div>
+        {password && password.length < 8 && <small className="adm-warn">Минимум 8 символов — сейчас {password.length}</small>}
       </label>
       {error && <p className="adm-error">{error}</p>}
       <div className="adm-actions" style={{ marginTop: 14 }}>
