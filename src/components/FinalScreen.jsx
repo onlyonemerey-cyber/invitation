@@ -1,11 +1,12 @@
 const STATUS = {
   sending: 'Отправляю ответ… 💌',
   sent: 'Ответ отправлен! Скоро напишу 💕',
-  saved: 'Ответ сохранён 💕',
-  error: 'Не получилось отправить — напиши мне сама 🙈',
+  demo: 'Это демо-версия — ответ никуда не отправлен 💕',
+  limit: 'Слишком много изменений — напиши мне напрямую 🙈',
+  error: 'Не получилось отправить 😔',
 };
 
-export default function FinalScreen({ place, date, time, status, onRestart }) {
+export default function FinalScreen({ place, date, time, status, onRetry, onRestart }) {
   return (
     <section className="screen">
       <div className="big-emoji beat">💞</div>
@@ -28,6 +29,11 @@ export default function FinalScreen({ place, date, time, status, onRestart }) {
       </div>
 
       <p className="status" aria-live="polite">{STATUS[status]}</p>
+      {status === 'error' && (
+        <button type="button" className="btn btn-yes" style={{ marginTop: 12 }} onClick={onRetry}>
+          Попробовать ещё раз
+        </button>
+      )}
       <button type="button" className="link" onClick={onRestart}>
         изменить выбор
       </button>

@@ -1,0 +1,14 @@
+{
+  "name": "invitation-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "db:local": "wrangler d1 migrations apply invitation --local",
+    "db:remote": "wrangler d1 migrations apply invitation --remote",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "3.114.17"
+  }
+}

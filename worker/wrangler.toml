@@ -1,0 +1,22 @@
+name = "invitation-api"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+# Куда ведут ссылки для девушки
+SITE_URL = "https://onlyonemerey-cyber.github.io/invitation/"
+BOT_USERNAME = "WithLoveGiftBot"
+# С каких сайтов можно обращаться к API (через запятую)
+ALLOWED_ORIGINS = "https://onlyonemerey-cyber.github.io,http://localhost:5173"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "invitation"
+database_id = "00000000-0000-0000-0000-000000000000" # заменится после `wrangler d1 create`
+migrations_dir = "migrations"
+
+# Секреты (не хранятся в коде), задаются командой `wrangler secret put <ИМЯ>`:
+#   TG_BOT_TOKEN       — токен бота от @BotFather
+#   TG_WEBHOOK_SECRET  — любая случайная строка, защищает вебхук
+#   ADMIN_PASSWORD     — пароль от админки
+# Для локального запуска они лежат в worker/.dev.vars
