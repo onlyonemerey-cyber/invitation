@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>У меня к тебе вопрос 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Comfortaa:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #fff0f5;
+    --bg2: #ffd6e7;
+    --card: rgba(255, 255, 255, 0.72);
+    --pink: #ff8fb8;
+    --pink-dark: #e75a91;
+    --pink-soft: #ffe3ee;
+    --text: #7a3655;
+    --muted: #b06d8b;
+    --shadow: 0 20px 60px rgba(231, 90, 145, 0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Comfortaa', system-ui, sans-serif;
+    color: var(--text);
+    background: radial-gradient(circle at 20% 20%, #fff 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #ffc2da 0%, transparent 45%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  /* Падающие сердечки */
+  .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .hearts span {
+    position: absolute; top: -40px;
+    animation: fall linear forwards;
+    opacity: .7;
+    user-select: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+
+  .card {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 480px;
+    background: var(--card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,.8);
+    border-radius: 32px;
+    box-shadow: var(--shadow);
+    padding: 40px 28px 36px;
+    text-align: center;
+  }
+
+  .screen { display: none; animation: pop .6s cubic-bezier(.2,1.4,.4,1); }
+  .screen.active { display: block; }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(.85) translateY(20px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .big-emoji { font-size: 84px; line-height: 1; display: inline-block; animation: beat 1.2s infinite; }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+  }
+
+  h1 {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(38px, 9vw, 50px);
+    line-height: 1.1;
+    margin: 18px 0 10px;
+    color: var(--pink-dark);
+  }
+  h2 {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(32px, 8vw, 42px);
+    color: var(--pink-dark);
+    margin: 10px 0 6px;
+  }
+  p.sub { color: var(--muted); font-size: 15px; line-height: 1.5; margin-bottom: 26px; }
+
+  .btns {
+    display: flex; gap: 16px; justify-content: center; align-items: center;
+    min-height: 80px; flex-wrap: wrap;
+  }
+  .btn {
+    font-family: inherit; font-weight: 700;
+    font-size: 18px;
+    border: none; cursor: pointer;
+    padding: 14px 34px;
+    border-radius: 999px;
+    transition: transform .25s, box-shadow .25s, background .25s, font-size .3s, padding .3s;
+  }
+  .btn-yes {
+    background: linear-gradient(135deg, #ff9cc2, var(--pink-dark));
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(231, 90, 145, .4);
+  }
+  .btn-yes:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 30px rgba(231, 90, 145, .5); }
+  .btn-no {
+    background: #fff;
+    color: var(--muted);
+    border: 2px solid var(--pink-soft);
+    z-index: 50;
+  }
+  .btn-no.running {
+    position: fixed;
+    transition: left .35s cubic-bezier(.3,1.5,.5,1), top .35s cubic-bezier(.3,1.5,.5,1), transform .2s;
+  }
+
+  /* Выбор места */
+  .options {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+    margin: 22px 0 24px;
+  }
+  .opt {
+    background: #fff;
+    border: 2px solid var(--pink-soft);
+    border-radius: 20px;
+    padding: 16px 8px;
+    cursor: pointer;
+    font-family: inherit; color: var(--text); font-weight: 600; font-size: 15px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: all .2s;
+  }
+  .opt .e { font-size: 34px; transition: transform .3s; }
+  .opt:hover { border-color: var(--pink); transform: translateY(-2px); }
+  .opt:hover .e { transform: scale(1.15) rotate(-6deg); }
+  .opt.selected {
+    background: linear-gradient(135deg, #ffe0ec, #ffc8dd);
+    border-color: var(--pink-dark);
+    box-shadow: 0 8px 20px rgba(231, 90, 145, .25);
+  }
+
+  .custom-input, .field input {
+    width: 100%;
+    font-family: inherit; font-size: 16px; color: var(--text);
+    background: #fff;
+    border: 2px solid var(--pink-soft);
+    border-radius: 16px;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .custom-input:focus, .field input:focus { border-color: var(--pink); }
+  .custom-input { display: none; margin: -10px 0 22px; }
+  .custom-input.show { display: block; animation: pop .4s; }
+
+  /* Дата */
+  .field { text-align: left; margin: 18px 0; }
+  .field label { display: block; font-size: 14px; font-weight: 700; color: var(--muted); margin: 0 0 8px 6px; }
+  .times { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-family: inherit; font-size: 14px; font-weight: 600; color: var(--text);
+    background: #fff; border: 2px solid var(--pink-soft);
+    border-radius: 999px; padding: 9px 16px; cursor: pointer; transition: all .2s;
+  }
+  .chip:hover { border-color: var(--pink); }
+  .chip.selected { background: var(--pink-dark); border-color: var(--pink-dark); color: #fff; }
+
+  .btn-next[disabled] { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none; }
+  .back {
+    background: none; border: none; font-family: inherit; color: var(--muted);
+    font-size: 14px; margin-top: 14px; cursor: pointer; text-decoration: underline;
+  }
+
+  /* Финал */
+  .ticket {
+    background: #fff;
+    border: 2px dashed var(--pink);
+    border-radius: 22px;
+    padding: 22px 18px;
+    margin: 20px 0 24px;
+    text-align: left;
+  }
+  .ticket .row { display: flex; gap: 12px; align-items: center; padding: 8px 0; font-size: 16px; }
+  .ticket .row + .row { border-top: 1px solid var(--pink-soft); }
+  .ticket .row .i { font-size: 24px; width: 32px; text-align: center; }
+  .ticket .row small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+  .toast {
+    position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(100px);
+    background: var(--pink-dark); color: #fff; padding: 12px 22px; border-radius: 999px;
+    font-size: 14px; transition: transform .3s; z-index: 100; box-shadow: var(--shadow);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 380px) {
+    .card { padding: 32px 18px 28px; }
+    .opt { padding: 14px 6px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<main class="card">
+
+  <!-- Экран 1: вопрос -->
+  <section class="screen active" id="s-ask">
+    <div class="big-emoji">💗</div>
+    <h1>Сходишь со мной на свидание?</h1>
+    <p class="sub">Я долго думал, как спросить… и решил просто спросить 🙈</p>
+    <div class="btns">
+      <button class="btn btn-yes" id="yes">Да 💕</button>
+      <button class="btn btn-no" id="no">Нет</button>
+    </div>
+  </section>
+
+  <!-- Экран 2: место -->
+  <section class="screen" id="s-place">
+    <div class="big-emoji">🥰</div>
+    <h2>Ура! Я знал!</h2>
+    <p class="sub" style="margin-bottom:0">Куда тебе хочется пойти?</p>
+    <div class="options" id="places">
+      <button class="opt" data-v="Прогулка в парке"><span class="e">🌳</span>Парк</button>
+      <button class="opt" data-v="Кино"><span class="e">🎬</span>Кино</button>
+      <button class="opt" data-v="Ресторан"><span class="e">🍝</span>Ресторан</button>
+      <button class="opt" data-v="Уютное кафе"><span class="e">☕</span>Кафе</button>
+      <button class="opt" data-v="Каток"><span class="e">⛸️</span>Каток</button>
+      <button class="opt" data-v="Музей / выставка"><span class="e">🖼️</span>Музей</button>
+      <button class="opt" data-v="Боулинг"><span class="e">🎳</span>Боулинг</button>
+      <button class="opt" data-v="custom"><span class="e">✨</span>Свой вариант</button>
+    </div>
+    <input class="custom-input" id="customPlace" type="text" placeholder="Напиши, куда хочешь 💭" maxlength="60">
+    <button class="btn btn-yes btn-next" id="toDate" disabled>Дальше →</button>
+  </section>
+
+  <!-- Экран 3: дата -->
+  <section class="screen" id="s-date">
+    <div class="big-emoji">📅</div>
+    <h2>Когда тебе удобно?</h2>
+    <div class="field">
+      <label for="date">Дата</label>
+      <input type="date" id="date">
+    </div>
+    <div class="field">
+      <label>Время</label>
+      <div class="times" id="times">
+        <button class="chip" data-v="12:00">12:00</button>
+        <button class="chip" data-v="14:00">14:00</button>
+        <button class="chip" data-v="16:00">16:00</button>
+        <button class="chip" data-v="18:00">18:00</button>
+        <button class="chip" data-v="19:00">19:00</button>
+        <button class="chip" data-v="20:00">20:00</button>
+      </div>
+    </div>
+    <button class="btn btn-yes btn-next" id="toFinal" disabled>Готово 💖</button>
+    <br><button class="back" id="backPlace">← изменить место</button>
+  </section>
+
+  <!-- Экран 4: финал -->
+  <section class="screen" id="s-final">
+    <div class="big-emoji">💞</div>
+    <h2>Это свидание!</h2>
+    <p class="sub" style="margin-bottom:0">Уже жду не дождусь ✨</p>
+    <div class="ticket">
+      <div class="row"><span class="i">📍</span><div><small>Куда</small><b id="rPlace"></b></div></div>
+      <div class="row"><span class="i">📅</span><div><small>Когда</small><b id="rDate"></b></div></div>
+      <div class="row"><span class="i">⏰</span><div><small>Во сколько</small><b id="rTime"></b></div></div>
+    </div>
+    <p class="sub" id="sendStatus" style="margin:0;font-weight:700"></p>
+    <button class="back" id="restart">изменить выбор</button>
+  </section>
+
+</main>
+
+<div class="toast" id="toast">Скопировано! Отправь мне 💕</div>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  const state = { place: '', date: '', time: '' };
+
+  /* ---------- Сердечки на фоне ---------- */
+  const heartsBox = $('#hearts');
+  const heartChars = ['💗', '💕', '💖', '🌸', '💓', '🤍'];
+  function spawnHeart(burst = false) {
+    const h = document.createElement('span');
+    h.textContent = heartChars[Math.random() * heartChars.length | 0];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.fontSize = (14 + Math.random() * (burst ? 30 : 18)) + 'px';
+    const dur = burst ? 2.5 + Math.random() * 2 : 6 + Math.random() * 6;
+    h.style.animationDuration = dur + 's';
+    heartsBox.appendChild(h);
+    setTimeout(() => h.remove(), dur * 1000);
+  }
+  setInterval(spawnHeart, 550);
+  function burst(n = 40) { for (let i = 0; i < n; i++) setTimeout(() => spawnHeart(true), i * 30); }
+
+  /* ---------- Переключение экранов ---------- */
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+  }
+
+  /* ---------- Убегающая кнопка «Нет» ---------- */
+  const yes = $('#yes'), no = $('#no');
+  const phrases = ['Нет', 'Точно?', 'Подумай ещё 🥺', 'Не-а 😜', 'Мимо!', 'Попробуй «Да»', 'Ну пожалуйста 🙏', 'Не поймаешь 😏'];
+  let escapes = 0;
+
+  function runAway() {
+    const r = no.getBoundingClientRect();
+    if (!no.classList.contains('running')) {
+      no.style.left = r.left + 'px';
+      no.style.top = r.top + 'px';
+      no.classList.add('running');
+      no.offsetHeight; // reflow, чтобы сработала анимация
+    }
+    const pad = 16;
+    const maxX = window.innerWidth - r.width - pad;
+    const maxY = window.innerHeight - r.height - pad;
+    const yr = yes.getBoundingClientRect();
+    let x, y, tries = 0;
+    do {
+      // отпрыгивает недалеко: на 90–200px в случайную сторону
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 90 + Math.random() * 110;
+      x = Math.min(Math.max(r.left + Math.cos(angle) * dist, pad), maxX);
+      y = Math.min(Math.max(r.top + Math.sin(angle) * dist, pad), maxY);
+      tries++;
+    } while (
+      tries < 40 && (
+        // не прыгаем на кнопку «Да» и не застреваем у края на месте
+        (x < yr.right + 20 && x + r.width > yr.left - 20 && y < yr.bottom + 20 && y + r.height > yr.top - 20) ||
+        Math.hypot(x - r.left, y - r.top) < 70
+      )
+    );
+    no.style.left = x + 'px';
+    no.style.top = y + 'px';
+
+    escapes++;
+    no.textContent = phrases[escapes % phrases.length];
+    const scale = Math.min(1 + escapes * 0.08, 1.8);
+    yes.style.transform = `scale(${scale})`;
+  }
+
+  no.addEventListener('mouseenter', runAway);
+  no.addEventListener('touchstart', (e) => { e.preventDefault(); runAway(); }, { passive: false });
+  no.addEventListener('click', (e) => { e.preventDefault(); runAway(); });
+  no.addEventListener('focus', () => no.blur());
+
+  window.addEventListener('resize', () => {
+    if (no.classList.contains('running')) {
+      const r = no.getBoundingClientRect();
+      no.style.left = Math.min(r.left, window.innerWidth - r.width - 16) + 'px';
+      no.style.top = Math.min(r.top, window.innerHeight - r.height - 16) + 'px';
+    }
+  });
+
+  yes.addEventListener('click', () => {
+    no.style.display = 'none';
+    burst(50);
+    show('#s-place');
+  });
+
+  /* ---------- Выбор места ---------- */
+  const custom = $('#customPlace'), toDate = $('#toDate');
+  function updatePlaceBtn() {
+    toDate.disabled = !state.place || (state.place === 'custom' && !custom.value.trim());
+  }
+  $('#places').addEventListener('click', (e) => {
+    const opt = e.target.closest('.opt');
+    if (!opt) return;
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    state.place = opt.dataset.v;
+    custom.classList.toggle('show', state.place === 'custom');
+    if (state.place === 'custom') custom.focus();
+    updatePlaceBtn();
+  });
+  custom.addEventListener('input', updatePlaceBtn);
+  toDate.addEventListener('click', () => show('#s-date'));
+
+  /* ---------- Дата и время ---------- */
+  const dateInput = $('#date'), toFinal = $('#toFinal');
+  const today = new Date();
+  const iso = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  dateInput.min = iso(today);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  dateInput.value = iso(tomorrow);
+  state.date = dateInput.value;
+
+  function updateFinalBtn() { toFinal.disabled = !(state.date && state.time); }
+  dateInput.addEventListener('input', () => { state.date = dateInput.value; updateFinalBtn(); });
+  $('#times').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip');
+    if (!c) return;
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('selected'));
+    c.classList.add('selected');
+    state.time = c.dataset.v;
+    updateFinalBtn();
+  });
+  $('#backPlace').addEventListener('click', () => show('#s-place'));
+
+  /* ---------- Финал ---------- */
+  function placeText() { return state.place === 'custom' ? custom.value.trim() : state.place; }
+  function dateText() {
+    const [y, m, d] = state.date.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  toFinal.addEventListener('click', () => {
+    $('#rPlace').textContent = placeText();
+    $('#rDate').textContent = dateText();
+    $('#rTime').textContent = state.time;
+    burst(70);
+    show('#s-final');
+    sendToTelegram();
+  });
+
+  /* ---------- Автоотправка ответа в Telegram ---------- */
+  // 1) Создай бота у @BotFather → получишь токен
+  // 2) Напиши своему боту /start
+  // 3) Открой https://api.telegram.org/bot<ТОКЕН>/getUpdates → возьми "chat":{"id": ...}
+  const TG_BOT_TOKEN = 'ВСТАВЬ_ТОКЕН_БОТА';
+  const TG_CHAT_ID   = 'ВСТАВЬ_CHAT_ID';
+
+  function answerText() {
+    return `💌 Она ответила ДА!\n\n📍 Куда: ${placeText()}\n📅 Когда: ${dateText()}\n⏰ Время: ${state.time}\n\n🏃 Пыталась нажать «Нет»: ${escapes} раз(а)`;
+  }
+
+  function sendToTelegram() {
+    const status = $('#sendStatus');
+    if (TG_BOT_TOKEN.startsWith('ВСТАВЬ')) {
+      status.textContent = 'Ответ сохранён 💕';
+      console.warn('Telegram не настроен: укажи TG_BOT_TOKEN и TG_CHAT_ID');
+      return;
+    }
+    status.textContent = 'Отправляю ответ… 💌';
+    fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ chat_id: TG_CHAT_ID, text: answerText() })
+    })
+      .then(() => { status.textContent = 'Ответ отправлен! Скоро напишу 💕'; })
+      .catch(() => { status.textContent = 'Не получилось отправить — напиши мне сама 🙈'; });
+  }
+
+  $('#restart').addEventListener('click', () => show('#s-place'));
+</script>
+</body>
+</html>
