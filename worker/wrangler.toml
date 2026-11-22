@@ -12,7 +12,7 @@ ALLOWED_ORIGINS = "https://onlyonemerey-cyber.github.io,http://localhost:5173"
 [[d1_databases]]
 binding = "DB"
 database_name = "invitation"
-database_id = "00000000-0000-0000-0000-000000000000" # заменится после `wrangler d1 create`
+database_id = "96dd8030-c8c9-4792-b54d-c8674567a01b"
 migrations_dir = "migrations"
 
 # Секреты (не хранятся в коде), задаются командой `wrangler secret put <ИМЯ>`:
